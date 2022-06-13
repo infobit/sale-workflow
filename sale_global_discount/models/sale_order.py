@@ -90,15 +90,19 @@ class SaleOrder(models.Model):
         res = super()._amount_all()
         for order in self:
             order._check_global_discounts_sanity()
+
             amount_untaxed_before_global_discounts = order.amount_untaxed
             amount_total_before_global_discounts = order.amount_total
+
             discounts = order.global_discount_ids.mapped("discount")
             amount_discounted_untaxed = amount_discounted_tax = 0
             for line in order.order_line:
                 discounted_subtotal = self.get_discounted_global(
                     line.price_subtotal, discounts.copy()
                 )
+
                 amount_discounted_untaxed += discounted_subtotal
+
                 discounted_tax = line.tax_id.compute_all(
                     discounted_subtotal,
                     line.order_id.currency_id,
@@ -106,9 +110,11 @@ class SaleOrder(models.Model):
                     product=line.product_id,
                     partner=line.order_id.partner_shipping_id,
                 )
+
                 amount_discounted_tax += sum(
                     t.get("amount", 0.0) for t in discounted_tax.get("taxes", [])
                 )
+                
             order.update(
                 {
                     "amount_untaxed_before_global_discounts": (

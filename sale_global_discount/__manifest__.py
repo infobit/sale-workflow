@@ -11,7 +11,7 @@
     "license": "AGPL-3",
     "depends": ["account_global_discount", "sale"],
     "data": ["views/sale_order_views.xml", 
-            #"views/report_sale_order.xml"
+            "views/report_sale_order.xml"
         ],
     "application": False,
     "installable": True,
