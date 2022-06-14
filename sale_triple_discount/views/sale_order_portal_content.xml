@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!-- Copyright 2020 Tecnativa - David Vidal
+     License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
+<odoo>
+    <template id="sale_order_portal_content_triple_discount" inherit_id="sale.sale_order_portal_content">
+
+        <xpath expr="//section[@id='details']/h3" position="after">
+            <t t-set="display_discount2" t-value="True in [line.discount2 &gt; 0 for line in sale_order.order_line]"/>
+            <t t-set="display_discount3" t-value="True in [line.discount3 &gt; 0 for line in sale_order.order_line]"/>
+        </xpath>
+
+        <xpath expr="//table[@id='sales_order_table']/thead/tr/th[4]" position="after">
+            <span t-esc="display_discount3">
+            </span>
+            <th t-if="display_discount2">
+                <span>Disc2.%</span>
+            </th>
+            <th t-if="display_discount3">
+                <span>Disc3.%</span>
+            </th>
+        </xpath>
+        <xpath expr="//table[@id='sales_order_table']/tbody/t/tr/t/td[3]" position="replace">
+
+            <td t-attf-class="text-right {{ 'd-none d-sm-table-cell' if report_type == 'html' else '' }}">
+                <div t-if=" line.discount &gt;= 0 or line.discount2 &gt;= 0 or line.discount3 &gt;= 0" 
+                t-field="line.price_unit" 
+                t-att-style=" (line.discount or line.discount2 or line.discount3 )and 'text-decoration: line-through' or None" 
+                t-att-class="((line.discount or line.discount2 or line.discount3) and 'text-danger' or '') + ' text-right'" />
+                <!--<div t-if="line.discount and not line.discount2">
+                    <t t-esc="(1-line.discount / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
+                </div>
+                <div t-if="line.discount2 and not line.discount3 ">
+                    <t t-esc="(1-line.discount / 100.0) * (1-line.discount2 / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
+                </div>-->
+                <div t-if="line.discount or line.discount2 or line.discount3 ">
+                    <t t-esc="(1-line.discount / 100.0) * (1-line.discount2 / 100.0)* (1-line.discount3 / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
+                </div>
+            </td>
+
+        </xpath>
+        <xpath expr="//table[@id='sales_order_table']/tbody/t/tr/t/td[4]" position="after">
+            <td t-if="display_discount2">
+                <strong t-if="line.discount2 &gt; 0" class="text-info">
+                    <t t-esc="((line.discount2 % 1) and '%s' or '%d') % line.discount2" />
+                    %
+                </strong>
+            </td>
+            <td t-if="display_discount3">
+                <strong t-if="line.discount3 &gt; 0" class="text-info">
+                    <t t-esc="((line.discount3 % 1) and '%s' or '%d') % line.discount3" />
+                    %
+                </strong>
+            </td>
+        </xpath>
+    </template>
+</odoo>
