@@ -26,12 +26,6 @@
                 t-field="line.price_unit" 
                 t-att-style=" (line.discount or line.discount2 or line.discount3 )and 'text-decoration: line-through' or None" 
                 t-att-class="((line.discount or line.discount2 or line.discount3) and 'text-danger' or '') + ' text-right'" />
-                <!--<div t-if="line.discount and not line.discount2">
-                    <t t-esc="(1-line.discount / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
-                </div>
-                <div t-if="line.discount2 and not line.discount3 ">
-                    <t t-esc="(1-line.discount / 100.0) * (1-line.discount2 / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
-                </div>-->
                 <div t-if="line.discount or line.discount2 or line.discount3 ">
                     <t t-esc="(1-line.discount / 100.0) * (1-line.discount2 / 100.0)* (1-line.discount3 / 100.0) * line.price_unit" t-options="{&quot;widget&quot;: &quot;float&quot;, &quot;decimal_precision&quot;: &quot;Product Price&quot;}" />
                 </div>
