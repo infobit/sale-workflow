@@ -78,7 +78,9 @@ class BlanketOrderWizard(models.TransientModel):
                     "partner_id": bol.partner_id,
                 },
             )
-            for bol in bo_lines.filtered(lambda l: l.remaining_uom_qty != 0.0)
+            for bol in bo_lines.filtered(
+                lambda l: not l.display_type and l.remaining_uom_qty != 0.0
+            )
         ]
         return lines
 
@@ -108,6 +110,26 @@ class BlanketOrderWizard(models.TransientModel):
             "product_uom_qty": line.qty,
             "tax_id": [(6, 0, line.taxes_id.ids)],
             "analytic_tag_ids": [(6, 0, line.blanket_line_id.analytic_tag_ids.ids)],
+        }
+
+    def _prepare_so_vals(
+        self,
+        customer,
+        user_id,
+        currency_id,
+        pricelist_id,
+        payment_term_id,
+        order_lines_by_customer,
+    ):
+        return {
+            "partner_id": customer,
+            "origin": self.blanket_order_id.name,
+            "user_id": user_id,
+            "currency_id": currency_id,
+            "pricelist_id": pricelist_id,
+            "payment_term_id": payment_term_id,
+            "order_line": order_lines_by_customer[customer],
+            "analytic_account_id": self.blanket_order_id.analytic_account_id.id,
         }
 
     def create_sale_order(self):
@@ -155,16 +177,14 @@ class BlanketOrderWizard(models.TransientModel):
 
         res = []
         for customer in order_lines_by_customer:
-            order_vals = {
-                "partner_id": customer,
-                "origin": self.blanket_order_id.name,
-                "user_id": user_id,
-                "currency_id": currency_id,
-                "pricelist_id": pricelist_id,
-                "payment_term_id": payment_term_id,
-                "order_line": order_lines_by_customer[customer],
-                "analytic_account_id": self.blanket_order_id.analytic_account_id.id,
-            }
+            order_vals = self._prepare_so_vals(
+                customer,
+                user_id,
+                currency_id,
+                pricelist_id,
+                payment_term_id,
+                order_lines_by_customer,
+            )
             sale_order = self.env["sale.order"].create(order_vals)
             res.append(sale_order.id)
         return {
